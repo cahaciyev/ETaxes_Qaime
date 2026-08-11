@@ -1,6 +1,7 @@
 <meta charset="utf-8">
 <title>Qaimə Paket Generator</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #F6F4EE;
@@ -312,7 +313,7 @@
     <span class="tag">QAIME_1 · v304</span>
   </div>
   <p class="lede">
-    Cədvəldəki sətirlərdən (RRN, Ad, Müqavilə, Məbləğ) doğrulanmış QAIME_1 strukturunda XML qaimələr və vergi portalına yükləmək üçün ZIP paket hazırlayır.
+    Cədvəldəki sətirlərdən (Ad, Müqavilə, ID/VÖEN, Məbləğ) doğrulanmış QAIME_1 strukturunda XML qaimələr və vergi portalına yükləmək üçün ZIP paket hazırlayır. Sütunların sırası önəmli deyil — başlıqlara görə avtomatik tanınır.
   </p>
 
   <section class="card">
@@ -328,10 +329,25 @@
   </section>
 
   <section class="card">
+    <div class="card-head"><h2>Fayldan yüklə</h2></div>
+    <div class="card-body">
+      <p class="paste-hint">
+        Kompüterinizdən Excel (<b>.xlsx</b>) və ya <b>.csv</b> faylı seçin. Sütun adları tanınan başlıqlar: <b>Ad</b>, <b>Müqavilə</b>, <b>RRN&nbsp;/&nbsp;VÖEN&nbsp;/&nbsp;Borrower&nbsp;ID</b>, <b>Amount&nbsp;/&nbsp;Məbləğ</b> — sıra önəmli deyil.
+      </p>
+      <div class="paste-actions">
+        <label class="btn-primary" for="fileInput" style="display:inline-block; padding:9px 16px; border-radius:7px; font-weight:600; font-size:14px; cursor:pointer;">Fayl seç</label>
+        <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+        <span id="fileName" style="color:var(--ink-muted); font-size:13.5px;">Fayl seçilməyib</span>
+      </div>
+      <span id="fileNote" class="parse-note"></span>
+    </div>
+  </section>
+
+  <section class="card">
     <div class="card-head"><h2>Google Sheets mənbəyi</h2></div>
     <div class="card-body">
       <p class="paste-hint">
-        Cədvəlin paylaşım icazəsi <b>"Link olan hər kəs baxa bilər"</b> olmalıdır. Sütun sırası: <b>RRN&nbsp;·&nbsp;Ad&nbsp;·&nbsp;Müqavilə&nbsp;·&nbsp;Məbləğ</b>.
+        Cədvəlin paylaşım icazəsi <b>"Link olan hər kəs baxa bilər"</b> olmalıdır.
       </p>
       <div class="sender-grid" style="grid-template-columns: 1fr auto;">
         <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…/edit">
@@ -347,7 +363,7 @@
       <p class="paste-hint">
         İstəsəniz cədvəldən sətirləri birbaşa da yapışdıra bilərsiniz: seçin <b>(Ctrl+A → Ctrl+C)</b>, aşağıya yapışdırın <b>(Ctrl+V)</b>.
       </p>
-      <textarea id="pasteArea" placeholder="1234567890	NÜMUNƏ MƏMMƏDOV	100 saylı	1500&#10;9876543210	NÜMUNƏ ƏLİYEV	101 saylı	2200"></textarea>
+      <textarea id="pasteArea" placeholder="Ad	Müqavilə	Borrower ID	Amount&#10;NÜMUNƏ MƏMMƏDOV	100 saylı	1234567890	1500&#10;NÜMUNƏ ƏLİYEV	101 saylı	9876543210	2200"></textarea>
       <div class="paste-actions">
         <button class="btn-primary" id="parseBtn">Cədvəli oxu</button>
         <button class="btn-ghost" id="clearBtn">Təmizlə</button>
@@ -415,6 +431,9 @@
   const sheetUrl = document.getElementById("sheetUrl");
   const fetchSheetBtn = document.getElementById("fetchSheetBtn");
   const fetchNote = document.getElementById("fetchNote");
+  const fileInput = document.getElementById("fileInput");
+  const fileNameEl = document.getElementById("fileName");
+  const fileNote = document.getElementById("fileNote");
 
   // ---------- settings persistence ----------
   const SETTINGS_KEY = "qaimePaketSettings";
@@ -442,9 +461,47 @@
     return line.split(",");
   }
 
-  function looksLikeHeader(cells) {
-    const joined = cells.join(" ").toLowerCase();
-    return /rrn|voen|vöen/.test(joined) && /(ad|name)/.test(joined);
+  function detectColumnMap(headerCells) {
+    const map = {};
+    let hits = 0;
+    headerCells.forEach((h, i) => {
+      const key = String(h == null ? "" : h).trim().toLowerCase();
+      if (!key) return;
+      if (map.rrn === undefined && /(borrower.?id|\bid\b|rrn|voen|v[öo]en)/.test(key)) { map.rrn = i; hits++; }
+      else if (map.contract === undefined && /(m[üu]qavil|contract)/.test(key)) { map.contract = i; hits++; }
+      else if (map.name === undefined && /(^ad[ıi]?$|\bname\b|adı)/.test(key)) { map.name = i; hits++; }
+      else if (map.amount === undefined && /(amount|m[əe]bl[əe]ğ|sum)/.test(key)) { map.amount = i; hits++; }
+    });
+    return hits >= 2 ? map : null;
+  }
+
+  function rowsFromTable(table) {
+    if (!table || !table.length) return [];
+    let startIdx = 0;
+    let colMap = { rrn: 0, name: 1, contract: 2, amount: 3 };
+    const detected = detectColumnMap(table[0]);
+    if (detected) {
+      colMap = Object.assign({}, colMap, detected);
+      startIdx = 1;
+    }
+    const out = [];
+    for (let i = startIdx; i < table.length; i++) {
+      const cells = table[i];
+      if (!cells || !cells.some(c => String(c == null ? "" : c).trim().length)) continue;
+      const rrn = String(cells[colMap.rrn] == null ? "" : cells[colMap.rrn]).replace(/[^\d]/g, "");
+      const name = String(cells[colMap.name] == null ? "" : cells[colMap.name]).trim();
+      const contract = String(cells[colMap.contract] == null ? "" : cells[colMap.contract]).trim();
+      const amount = normalizeAmount(cells[colMap.amount]);
+      const r = { rrn, name, contract, amount, selected: true };
+      r.errors = validateRow(r);
+      r.valid = r.errors.length === 0;
+      out.push(r);
+    }
+    return out;
+  }
+
+  function textToTable(text) {
+    return text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0).map(splitCells);
   }
 
   function normalizeAmount(raw) {
@@ -516,31 +573,11 @@
       throw new Error("Cədvəl yüklənmədi (HTTP " + resp.status + "). Paylaşım icazəsini yoxlayın: \"Link olan hər kəs baxa bilər\".");
     }
     const csvText = await resp.text();
-    const table = parseCSV(csvText);
-    return table.map(cells => cells.join("\t")).join("\n");
+    return parseCSV(csvText);
   }
 
   function parsePasted(text) {
-    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
-    if (!lines.length) return [];
-    let start = 0;
-    const firstCells = splitCells(lines[0]);
-    if (looksLikeHeader(firstCells)) start = 1;
-
-    const out = [];
-    for (let i = start; i < lines.length; i++) {
-      const cells = splitCells(lines[i]).map(c => c.trim());
-      if (cells.length < 4) continue;
-      const rrn = cells[0].replace(/[^\d]/g, "");
-      const name = cells[1] || "";
-      const contract = cells[2] || "";
-      const amount = normalizeAmount(cells[3]);
-      const r = { rrn, name, contract, amount, selected: true };
-      r.errors = validateRow(r);
-      r.valid = r.errors.length === 0;
-      out.push(r);
-    }
-    return out;
+    return rowsFromTable(textToTable(text));
   }
 
   // ---------- XML / ZIP building (QAIME_1 v304, VHF package format) ----------
@@ -846,6 +883,39 @@
   }
 
   // ---------- events ----------
+  fileInput.addEventListener("change", async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+    fileNameEl.textContent = file.name;
+    fileNote.className = "parse-note info show";
+    fileNote.textContent = "Oxunur…";
+    try {
+      const ext = file.name.split(".").pop().toLowerCase();
+      let table;
+      if (ext === "csv") {
+        const text = await file.text();
+        table = parseCSV(text);
+      } else {
+        if (typeof XLSX === "undefined") {
+          throw new Error("Excel oxuma kitabxanası yüklənmədi (internet bağlantısını yoxlayın) — CSV formatında sınayın.");
+        }
+        const buf = await file.arrayBuffer();
+        const wb = XLSX.read(buf, { type: "array" });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        table = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: "" });
+      }
+      const parsed = rowsFromTable(table);
+      rows = parsed;
+      const bad = parsed.filter(r => !r.valid).length;
+      fileNote.className = "parse-note info show";
+      fileNote.textContent = "Fayldan " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
+      render();
+    } catch (err) {
+      fileNote.className = "parse-note warn show";
+      fileNote.textContent = "Fayl oxunmadı: " + err.message;
+    }
+  });
+
   fetchSheetBtn.addEventListener("click", async () => {
     const url = sheetUrl.value.trim();
     if (!url) {
@@ -857,10 +927,10 @@
     const original = fetchSheetBtn.textContent;
     fetchSheetBtn.textContent = "Yüklənir…";
     try {
-      const tsv = await fetchSheetRows(url);
-      pasteArea.value = tsv;
+      const table = await fetchSheetRows(url);
+      pasteArea.value = table.map(cells => cells.join("\t")).join("\n");
       saveSettings();
-      const parsed = parsePasted(tsv);
+      const parsed = rowsFromTable(table);
       rows = parsed;
       const bad = parsed.filter(r => !r.valid).length;
       fetchNote.className = "parse-note info show";
