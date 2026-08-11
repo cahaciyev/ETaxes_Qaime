@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qaimə Paket Generator</title>
+<meta name="description" content="Cədvəldəki sətirlərdən QAIME_1 strukturunda XML qaimələr və vergi portalına yükləmək üçün ZIP paket hazırlayın.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="/assets/css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <span class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="#0B1210" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="#0B1210" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 13h7M8.5 16h4.5" stroke="#0B1210" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </span>
+      <span class="brand-text">
+        <strong>Qaimə Paket</strong>
+        <span>Generator</span>
+      </span>
+    </div>
+    <nav class="sidebar-nav">
+      <span class="nav-section-label">Naviqasiya</span>
+      <a class="nav-link" href="/index.html">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 11.5 12 4l8 7.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 20v-6h4v6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Ana səhifə
+      </a>
+      <a class="nav-link active" href="/qaime.html">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 13h7M8.5 16h4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        Qaimə paket
+      </a>
+    </nav>
+    <div class="sidebar-foot">
+      <span class="tag">QAIME_1 · v304</span>
+      <div>Vergi portalı üçün ZIP paket generatoru</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-label="Menyunu aç">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <span class="page-title">Qaimə paket</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Görünüşü dəyiş">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 12H2M22 12h-2.2M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </button>
+    </header>
+
+    <div class="content">
+      <p class="lede" style="margin-top:0;">
+        Cədvəldəki sətirlərdən (Ad, Müqavilə, ID/VÖEN, Məbləğ) doğrulanmış QAIME_1 strukturunda XML qaimələr və vergi portalına yükləmək üçün ZIP paket hazırlayır. Sütunların sırası önəmli deyil — başlıqlara görə avtomatik tanınır.
+      </p>
+
+      <section class="card">
+        <div class="card-head"><h2>Göndərən tərəf</h2></div>
+        <div class="card-body">
+          <div class="sender-grid">
+            <label class="field-label" for="senderTin">VÖEN</label>
+            <input type="text" id="senderTin" class="num" value="1405547011" maxlength="10">
+            <label class="field-label" for="senderName">Ad</label>
+            <input type="text" id="senderName" value="&quot;İNTERNATİONAL LEASİNG&quot; AÇIQ SƏHMDAR CƏMİYYƏTİ">
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Fayldan yüklə</h2></div>
+        <div class="card-body">
+          <p class="paste-hint">
+            Kompüterinizdən Excel (<b>.xlsx</b>) və ya <b>.csv</b> faylı seçin. Sütun adları tanınan başlıqlar: <b>Ad</b>, <b>Müqavilə</b>, <b>RRN&nbsp;/&nbsp;VÖEN&nbsp;/&nbsp;Borrower&nbsp;ID</b>, <b>Amount&nbsp;/&nbsp;Məbləğ</b> — sıra önəmli deyil.
+          </p>
+          <div class="paste-actions">
+            <label class="btn btn-primary" for="fileInput" style="cursor:pointer;">Fayl seç</label>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+            <span id="fileName" style="color:var(--ink-muted); font-size:13.5px;">Fayl seçilməyib</span>
+          </div>
+          <span id="fileNote" class="parse-note"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Google Sheets mənbəyi</h2></div>
+        <div class="card-body">
+          <p class="paste-hint">
+            Cədvəlin paylaşım icazəsi <b>"Link olan hər kəs baxa bilər"</b> olmalıdır.
+          </p>
+          <div class="sender-grid" style="grid-template-columns: 1fr auto;">
+            <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…/edit">
+            <button class="btn btn-primary" id="fetchSheetBtn">Cədvəldən yüklə</button>
+          </div>
+          <span id="fetchNote" class="parse-note"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head"><h2>Əl ilə daxil etmə (alternativ)</h2></div>
+        <div class="card-body">
+          <p class="paste-hint">
+            İstəsəniz cədvəldən sətirləri birbaşa da yapışdıra bilərsiniz: seçin <b>(Ctrl+A → Ctrl+C)</b>, aşağıya yapışdırın <b>(Ctrl+V)</b>.
+          </p>
+          <textarea id="pasteArea" placeholder="Ad	Müqavilə	Borrower ID	Amount&#10;NÜMUNƏ MƏMMƏDOV	100 saylı	1234567890	1500&#10;NÜMUNƏ ƏLİYEV	101 saylı	9876543210	2200"></textarea>
+          <div class="paste-actions">
+            <button class="btn btn-primary" id="parseBtn">Cədvəli oxu</button>
+            <button class="btn btn-ghost" id="clearBtn">Təmizlə</button>
+            <span id="parseNote" class="parse-note"></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" id="tableCard" style="display:none;">
+        <div class="card-head">
+          <h2>Qaimələr</h2>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost btn-small" id="selectAllBtn">Hamısını seç</button>
+            <button class="btn btn-ghost btn-small" id="selectNoneBtn">Seçimi ləğv et</button>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;">
+          <div class="table-wrap">
+            <table class="rows" id="rowsTable">
+              <thead>
+                <tr>
+                  <th></th><th>#</th><th>RRN</th><th>Ad</th><th>Müqavilə</th><th>Məbləğ (AZN)</th><th>Status</th><th></th>
+                </tr>
+              </thead>
+              <tbody id="rowsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <div class="empty-state" id="emptyState">Paket hazırlamaq üçün əvvəlcə yuxarıda cədvəl datasını yapışdırıb "Cədvəli oxu" düyməsini basın.</div>
+
+      <div class="actionbar" id="actionbar" style="display:none;">
+        <div class="summary">
+          <b id="selCount">0</b> qaimə seçilib · cəmi <span class="num" id="selSum">0.00</span> AZN
+        </div>
+        <button class="btn btn-primary" id="buildBtn" disabled>ZIP paket hazırla və yüklə</button>
+      </div>
+
+      <p class="footnote">
+        Paket QAIME_1 (versiya 304) sxeminə uyğun qurulur: hər qaimədə <span class="num">c11</span> (ƏDV-yə cəlb edilməyən məbləğ) tam məbləğə bərabər təyin olunur, <span class="num">qaimeYekunTable/c5</span> uyğunlaşdırılır. Yaradılan ZIP-i portala yükləmədən əvvəl Asan İmza (E-Signer / ASAN DOC) ilə imzalamağı unutmayın.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script defer src="/assets/js/qaime.js"></script>
+</body>
+</html>

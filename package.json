@@ -1,0 +1,12 @@
+{
+  "name": "etaxes-qaime",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Qaime Paket Generator - QAIME_1 (v304) ZIP paket hazirlama aleti",
+  "scripts": {
+    "build": "node build.js"
+  },
+  "devDependencies": {
+    "esbuild": "^0.23.1"
+  }
+}
