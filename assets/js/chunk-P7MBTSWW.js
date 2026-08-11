@@ -1,0 +1,1 @@
+function s(){let t=document.querySelectorAll(".reveal");if(!t.length)return;if(!("IntersectionObserver"in window)){t.forEach(e=>e.classList.add("in"));return}let n=new IntersectionObserver(e=>{e.forEach(r=>{r.isIntersecting&&(r.target.classList.add("in"),n.unobserve(r.target))})},{threshold:.12});t.forEach(e=>n.observe(e))}export{s as initHomePage};

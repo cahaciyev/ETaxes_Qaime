@@ -5,14 +5,15 @@ async function build() {
   fs.mkdirSync("assets/js", { recursive: true });
   fs.mkdirSync("assets/css", { recursive: true });
 
+  for (const f of fs.readdirSync("assets/js")) fs.rmSync("assets/js/" + f);
+
   await esbuild.build({
-    entryPoints: {
-      home: "src/js/entry-home.js",
-      qaime: "src/js/entry-qaime.js"
-    },
+    entryPoints: ["src/js/main.js"],
     bundle: true,
     minify: true,
-    format: "iife",
+    format: "esm",
+    splitting: true,
+    chunkNames: "chunk-[hash]",
     target: "es2019",
     legalComments: "none",
     outdir: "assets/js"

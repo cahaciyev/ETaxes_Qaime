@@ -111,18 +111,42 @@ export function initQaimePage() {
       tdStatus.appendChild(makeChip(r));
       tr.appendChild(tdStatus);
 
-      const tdXml = document.createElement("td");
+      const tdActions = document.createElement("td");
+      tdActions.className = "row-actions";
       const xmlBtn = document.createElement("button");
       xmlBtn.className = "xml-toggle";
       xmlBtn.textContent = "XML";
       xmlBtn.addEventListener("click", () => toggleXmlRow(tr, r));
-      tdXml.appendChild(xmlBtn);
-      tr.appendChild(tdXml);
+      tdActions.appendChild(xmlBtn);
+      const delBtn = document.createElement("button");
+      delBtn.className = "xml-toggle row-del";
+      delBtn.textContent = "Sil";
+      delBtn.title = "Sətri sil";
+      delBtn.addEventListener("click", () => deleteRow(r));
+      tdActions.appendChild(delBtn);
+      tr.appendChild(tdActions);
 
       rowsBody.appendChild(tr);
     });
 
     updateSummary();
+  }
+
+  function addEmptyRow() {
+    const r = { rrn: "", name: "", contract: "", amount: NaN, selected: false };
+    r.errors = validateRow(r);
+    r.valid = r.errors.length === 0;
+    rows.push(r);
+    render();
+    const inputs = rowsBody.querySelectorAll("tr:last-child input[type=text]");
+    if (inputs.length) inputs[0].focus();
+  }
+
+  function deleteRow(r) {
+    const idx = rows.indexOf(r);
+    if (idx === -1) return;
+    rows.splice(idx, 1);
+    render();
   }
 
   function makeChip(r) {
@@ -257,6 +281,11 @@ export function initQaimePage() {
     rows.forEach(r => { r.selected = false; });
     render();
   });
+
+  const addRowBtn = document.getElementById("addRowBtn");
+  const addRowBtnTable = document.getElementById("addRowBtnTable");
+  if (addRowBtn) addRowBtn.addEventListener("click", addEmptyRow);
+  if (addRowBtnTable) addRowBtnTable.addEventListener("click", addEmptyRow);
 
   buildBtn.addEventListener("click", async () => {
     const selected = rows.filter(r => r.valid && r.selected);

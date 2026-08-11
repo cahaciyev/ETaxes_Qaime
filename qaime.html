@@ -32,6 +32,10 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M6 3h9l5 5v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.5 13h7M8.5 16h4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
         Qaimə paket
       </a>
+      <a class="nav-link" href="/voen.html">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.7"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M8.5 11h5M11 8.5v5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        VÖEN yoxla
+      </a>
     </nav>
     <div class="sidebar-foot">
       <span class="tag">QAIME_1 · v304</span>
@@ -45,7 +49,7 @@
         <button class="menu-toggle" id="menuToggle" aria-expanded="false" aria-label="Menyunu aç">
           <svg viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </button>
-        <span class="page-title">Qaimə paket</span>
+        <span class="page-title" id="pageTitle">Qaimə paket</span>
       </div>
       <button class="theme-toggle" id="themeToggle" aria-pressed="false" aria-label="Görünüşü dəyiş">
         <svg class="icon-sun" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.2" stroke="currentColor" stroke-width="1.7"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 12H2M22 12h-2.2M5.6 5.6l1.5 1.5M16.9 16.9l1.5 1.5M18.4 5.6l-1.5 1.5M7.1 16.9l-1.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
@@ -53,7 +57,7 @@
       </button>
     </header>
 
-    <div class="content">
+    <div class="content" id="viewRoot">
       <p class="lede" style="margin-top:0;">
         Cədvəldəki sətirlərdən (Ad, Müqavilə, ID/VÖEN, Məbləğ) doğrulanmış QAIME_1 strukturunda XML qaimələr və vergi portalına yükləmək üçün ZIP paket hazırlayır. Sütunların sırası önəmli deyil — başlıqlara görə avtomatik tanınır.
       </p>
@@ -114,10 +118,21 @@
         </div>
       </section>
 
+      <section class="card">
+        <div class="card-head"><h2>Cədvəl kimi doldur</h2></div>
+        <div class="card-body">
+          <p class="paste-hint">
+            Heç bir mənbədən istifadə etmədən sıfırdan başlamaq istəyirsinizsə, boş sətir əlavə edib aşağıdakı cədvəldə birbaşa Excel kimi doldura bilərsiniz.
+          </p>
+          <button class="btn btn-primary" id="addRowBtn">+ Sətir əlavə et</button>
+        </div>
+      </section>
+
       <section class="card" id="tableCard" style="display:none;">
         <div class="card-head">
           <h2>Qaimələr</h2>
           <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost btn-small" id="addRowBtnTable">+ Sətir</button>
             <button class="btn btn-ghost btn-small" id="selectAllBtn">Hamısını seç</button>
             <button class="btn btn-ghost btn-small" id="selectNoneBtn">Seçimi ləğv et</button>
           </div>
@@ -152,6 +167,6 @@
   </div>
 </div>
 
-<script defer src="/assets/js/qaime.js"></script>
+<script type="module" src="/assets/js/main.js"></script>
 </body>
 </html>
