@@ -458,10 +458,14 @@
     return parseFloat(s);
   }
 
+  function extractContractNumber(raw) {
+    return String(raw == null ? "" : raw).replace(/\D/g, "");
+  }
+
   function validateRow(r) {
     const errors = [];
     if (!/^\d{10}$/.test(r.rrn)) errors.push("RRN 10 rəqəm olmalıdır");
-    if (!r.contract || !r.contract.trim()) errors.push("Müqavilə boşdur");
+    if (!extractContractNumber(r.contract)) errors.push("Müqavilə nömrəsində rəqəm tapılmadı");
     if (!isFinite(r.amount) || r.amount <= 0) errors.push("Məbləğ yanlışdır");
     return errors;
   }
@@ -552,8 +556,9 @@
   }
 
   function buildInvoiceXml(row, sTin, sName) {
-    const desText = row.contract.trim() + " lizinq müqaviləsinə əsasən aylıq mükafat";
-    const des2Text = row.contract.trim() + " lizinq müqaviləsinə əsasən";
+    const contractNum = extractContractNumber(row.contract);
+    const desText = contractNum + " saylı lizinq müqaviləsinə əsasən aylıq mükafat";
+    const des2Text = contractNum + " saylı lizinq müqaviləsinə əsasən";
     const amt2 = row.amount.toFixed(2);
     const amt4 = row.amount.toFixed(4);
 
