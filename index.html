@@ -1,0 +1,938 @@
+<meta charset="utf-8">
+<title>Qaimə Paket Generator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%BE%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #F6F4EE;
+    --surface: #FFFFFF;
+    --surface-alt: #EEEAE0;
+    --ink: #20262E;
+    --ink-muted: #656E79;
+    --accent: #1F6F5C;
+    --accent-strong: #154E40;
+    --accent-soft: #E3EFEA;
+    --line: #DFDACD;
+    --danger: #AE402A;
+    --danger-soft: #F6E3DC;
+    --success: #2F7A4F;
+    --success-soft: #E1F0E5;
+    --shadow: 0 1px 2px rgba(32,38,46,0.06), 0 8px 24px -12px rgba(32,38,46,0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #11151B;
+      --surface: #171D25;
+      --surface-alt: #1E2530;
+      --ink: #E9E6DD;
+      --ink-muted: #98A0AA;
+      --accent: #57C4A4;
+      --accent-strong: #7ADBBD;
+      --accent-soft: #17332C;
+      --line: #2A313C;
+      --danger: #E2836A;
+      --danger-soft: #3A241E;
+      --success: #6FCB93;
+      --success-soft: #1D3A28;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #11151B; --surface: #171D25; --surface-alt: #1E2530; --ink: #E9E6DD;
+    --ink-muted: #98A0AA; --accent: #57C4A4; --accent-strong: #7ADBBD;
+    --accent-soft: #17332C; --line: #2A313C; --danger: #E2836A; --danger-soft: #3A241E;
+    --success: #6FCB93; --success-soft: #1D3A28;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+  :root[data-theme="light"] {
+    --bg: #F6F4EE; --surface: #FFFFFF; --surface-alt: #EEEAE0; --ink: #20262E;
+    --ink-muted: #656E79; --accent: #1F6F5C; --accent-strong: #154E40;
+    --accent-soft: #E3EFEA; --line: #DFDACD; --danger: #AE402A; --danger-soft: #F6E3DC;
+    --success: #2F7A4F; --success-soft: #E1F0E5;
+    --shadow: 0 1px 2px rgba(32,38,46,0.06), 0 8px 24px -12px rgba(32,38,46,0.18);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .num { font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  .shell {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 40px 24px 96px;
+  }
+
+  .brand { display: flex; align-items: baseline; gap: 14px; margin-bottom: 4px; flex-wrap: wrap; }
+  .brand h1 {
+    font-family: ui-serif, "Iowan Old Style", "Source Serif Pro", Georgia, serif;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: 0.2px;
+    margin: 0;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+  .brand .tag {
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-strong);
+    background: var(--accent-soft);
+    padding: 4px 9px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+  .lede {
+    color: var(--ink-muted);
+    font-size: 15px;
+    max-width: 62ch;
+    line-height: 1.55;
+    margin: 10px 0 32px;
+  }
+
+  section.card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    margin-bottom: 22px;
+    overflow: hidden;
+  }
+  .card-head {
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .card-head h2 {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin: 0;
+  }
+  .card-body { padding: 20px 22px 22px; }
+
+  /* sender config */
+  .sender-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 12px 16px;
+    align-items: center;
+  }
+  label.field-label {
+    font-size: 12.5px;
+    color: var(--ink-muted);
+    font-weight: 600;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 14.5px;
+    color: var(--ink);
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 11px;
+    transition: border-color .12s ease, background .12s ease;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    background: var(--surface);
+  }
+  .sender-grid input.num { }
+
+  /* paste box */
+  textarea#pasteArea {
+    min-height: 130px;
+    resize: vertical;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .paste-hint {
+    font-size: 13px;
+    color: var(--ink-muted);
+    line-height: 1.6;
+    margin: 0 0 12px;
+  }
+  .paste-hint b { color: var(--ink); font-weight: 600; }
+  .paste-actions { display: flex; gap: 10px; margin-top: 14px; align-items: center; }
+
+  button {
+    font: inherit;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 7px;
+    border: 1px solid transparent;
+    padding: 9px 16px;
+    cursor: pointer;
+    transition: filter .12s ease, background .12s ease, border-color .12s ease;
+  }
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.06); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover:not(:disabled) { background: var(--surface-alt); }
+  .btn-small { padding: 5px 10px; font-size: 12.5px; border-radius: 5px; }
+
+  .parse-note {
+    font-size: 13px;
+    margin-top: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    display: none;
+  }
+  .parse-note.show { display: block; }
+  .parse-note.info { background: var(--accent-soft); color: var(--accent-strong); }
+  .parse-note.warn { background: var(--danger-soft); color: var(--danger); }
+
+  /* table */
+  .table-wrap { overflow-x: auto; }
+  table.rows { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  table.rows th {
+    text-align: left;
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-weight: 700;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  table.rows td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+  }
+  table.rows tr:last-child td { border-bottom: none; }
+  table.rows tr.row-invalid td { background: var(--danger-soft); }
+  table.rows input[type="text"] {
+    padding: 5px 8px;
+    font-size: 13px;
+    background: transparent;
+    border: 1px solid transparent;
+  }
+  table.rows input[type="text"]:hover { border-color: var(--line); }
+  table.rows input[type="text"]:focus { background: var(--surface-alt); border-color: var(--accent); }
+  td.amt input { text-align: right; }
+  td.chk { width: 30px; text-align: center; }
+  td.idx { width: 30px; color: var(--ink-muted); font-size: 12px; }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 3px 8px;
+    border-radius: 99px;
+  }
+  .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; }
+  .chip.ok { background: var(--success-soft); color: var(--success); }
+  .chip.ok::before { background: var(--success); }
+  .chip.bad { background: var(--danger-soft); color: var(--danger); }
+  .chip.bad::before { background: var(--danger); }
+
+  .xml-toggle { background: none; border: none; color: var(--ink-muted); font-size: 12px; text-decoration: underline; padding: 2px 4px; }
+  .xml-row td { padding: 0 10px 12px; border-bottom: 1px solid var(--line); }
+  .xml-row pre {
+    margin: 0;
+    background: var(--surface-alt);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 11.5px;
+    line-height: 1.5;
+    max-height: 260px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  }
+
+  .empty-state {
+    padding: 30px 10px;
+    text-align: center;
+    color: var(--ink-muted);
+    font-size: 13.5px;
+  }
+
+  /* sticky action bar */
+  .actionbar {
+    position: sticky;
+    bottom: 18px;
+    margin-top: 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow);
+    border-radius: 10px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .actionbar .summary { font-size: 13.5px; color: var(--ink-muted); }
+  .actionbar .summary b { color: var(--ink); font-weight: 700; }
+  .actionbar .summary .num { color: var(--accent-strong); font-weight: 700; }
+
+  .footnote {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+
+  a { color: var(--accent-strong); }
+
+  ::selection { background: var(--accent-soft); }
+
+  @media (max-width: 640px) {
+    .sender-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="shell">
+  <div class="brand">
+    <h1>Qaimə Paket Generator</h1>
+    <span class="tag">QAIME_1 · v304</span>
+  </div>
+  <p class="lede">
+    Cədvəldəki sətirlərdən (RRN, Ad, Müqavilə, Məbləğ) doğrulanmış QAIME_1 strukturunda XML qaimələr və vergi portalına yükləmək üçün ZIP paket hazırlayır.
+  </p>
+
+  <section class="card">
+    <div class="card-head"><h2>Göndərən tərəf</h2></div>
+    <div class="card-body">
+      <div class="sender-grid">
+        <label class="field-label" for="senderTin">VÖEN</label>
+        <input type="text" id="senderTin" class="num" value="1405547011" maxlength="10">
+        <label class="field-label" for="senderName">Ad</label>
+        <input type="text" id="senderName" value="&quot;İNTERNATİONAL LEASİNG&quot; AÇIQ SƏHMDAR CƏMİYYƏTİ">
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Google Sheets mənbəyi</h2></div>
+    <div class="card-body">
+      <p class="paste-hint">
+        Cədvəlin paylaşım icazəsi <b>"Link olan hər kəs baxa bilər"</b> olmalıdır. Sütun sırası: <b>RRN&nbsp;·&nbsp;Ad&nbsp;·&nbsp;Müqavilə&nbsp;·&nbsp;Məbləğ</b>.
+      </p>
+      <div class="sender-grid" style="grid-template-columns: 1fr auto;">
+        <input type="text" id="sheetUrl" placeholder="https://docs.google.com/spreadsheets/d/…/edit">
+        <button class="btn-primary" id="fetchSheetBtn">Cədvəldən yüklə</button>
+      </div>
+      <span id="fetchNote" class="parse-note"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Əl ilə daxil etmə (alternativ)</h2></div>
+    <div class="card-body">
+      <p class="paste-hint">
+        İstəsəniz cədvəldən sətirləri birbaşa da yapışdıra bilərsiniz: seçin <b>(Ctrl+A → Ctrl+C)</b>, aşağıya yapışdırın <b>(Ctrl+V)</b>.
+      </p>
+      <textarea id="pasteArea" placeholder="1234567890	NÜMUNƏ MƏMMƏDOV	100 saylı	1500&#10;9876543210	NÜMUNƏ ƏLİYEV	101 saylı	2200"></textarea>
+      <div class="paste-actions">
+        <button class="btn-primary" id="parseBtn">Cədvəli oxu</button>
+        <button class="btn-ghost" id="clearBtn">Təmizlə</button>
+        <span id="parseNote" class="parse-note"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="tableCard" style="display:none;">
+    <div class="card-head">
+      <h2>Qaimələr</h2>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-ghost btn-small" id="selectAllBtn">Hamısını seç</button>
+        <button class="btn-ghost btn-small" id="selectNoneBtn">Seçimi ləğv et</button>
+      </div>
+    </div>
+    <div class="card-body" style="padding:0;">
+      <div class="table-wrap">
+        <table class="rows" id="rowsTable">
+          <thead>
+            <tr>
+              <th></th><th>#</th><th>RRN</th><th>Ad</th><th>Müqavilə</th><th>Məbləğ (AZN)</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="rowsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <div class="empty-state" id="emptyState">Paket hazırlamaq üçün əvvəlcə yuxarıda cədvəl datasını yapışdırıb "Cədvəli oxu" düyməsini basın.</div>
+
+  <div class="actionbar" id="actionbar" style="display:none;">
+    <div class="summary">
+      <b id="selCount">0</b> qaimə seçilib · cəmi <span class="num" id="selSum">0.00</span> AZN
+    </div>
+    <button class="btn-primary" id="buildBtn" disabled>ZIP paket hazırla və yüklə</button>
+  </div>
+
+  <p class="footnote">
+    Paket QAIME_1 (versiya 304) sxeminə uyğun qurulur: hər qaimədə <span class="num">c11</span> (ƏDV-yə cəlb edilməyən məbləğ) tam məbləğə bərabər təyin olunur, <span class="num">qaimeYekunTable/c5</span> uyğunlaşdırılır. Yaradılan ZIP-i portala yükləmədən əvvəl Asan İmza (E-Signer / ASAN DOC) ilə imzalamağı unutmayın.
+  </p>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- state ----------
+  let rows = []; // {rrn, name, contract, amount, valid, errors, selected}
+
+  const pasteArea = document.getElementById("pasteArea");
+  const parseBtn = document.getElementById("parseBtn");
+  const clearBtn = document.getElementById("clearBtn");
+  const parseNote = document.getElementById("parseNote");
+  const tableCard = document.getElementById("tableCard");
+  const rowsBody = document.getElementById("rowsBody");
+  const emptyState = document.getElementById("emptyState");
+  const actionbar = document.getElementById("actionbar");
+  const selCount = document.getElementById("selCount");
+  const selSum = document.getElementById("selSum");
+  const buildBtn = document.getElementById("buildBtn");
+  const senderTin = document.getElementById("senderTin");
+  const senderName = document.getElementById("senderName");
+  const sheetUrl = document.getElementById("sheetUrl");
+  const fetchSheetBtn = document.getElementById("fetchSheetBtn");
+  const fetchNote = document.getElementById("fetchNote");
+
+  // ---------- settings persistence ----------
+  const SETTINGS_KEY = "qaimePaketSettings";
+  try {
+    const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+    if (saved.senderTin) senderTin.value = saved.senderTin;
+    if (saved.senderName) senderName.value = saved.senderName;
+    if (saved.sheetUrl) sheetUrl.value = saved.sheetUrl;
+  } catch (e) { /* ignore */ }
+
+  function saveSettings() {
+    try {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        senderTin: senderTin.value.trim(),
+        senderName: senderName.value.trim(),
+        sheetUrl: sheetUrl.value.trim()
+      }));
+    } catch (e) { /* ignore */ }
+  }
+  [senderTin, senderName, sheetUrl].forEach(el => el.addEventListener("change", saveSettings));
+
+  // ---------- parsing ----------
+  function splitCells(line) {
+    if (line.indexOf("\t") !== -1) return line.split("\t");
+    return line.split(",");
+  }
+
+  function looksLikeHeader(cells) {
+    const joined = cells.join(" ").toLowerCase();
+    return /rrn|voen|vöen/.test(joined) && /(ad|name)/.test(joined);
+  }
+
+  function normalizeAmount(raw) {
+    if (raw == null) return NaN;
+    let s = String(raw).trim().replace(/\s/g, "").replace(/,/g, ".");
+    // keep only last dot if multiple (thousand separators)
+    const parts = s.split(".");
+    if (parts.length > 2) {
+      s = parts.slice(0, -1).join("") + "." + parts[parts.length - 1];
+    }
+    return parseFloat(s);
+  }
+
+  function validateRow(r) {
+    const errors = [];
+    if (!/^\d{10}$/.test(r.rrn)) errors.push("RRN 10 rəqəm olmalıdır");
+    if (!r.contract || !r.contract.trim()) errors.push("Müqavilə boşdur");
+    if (!isFinite(r.amount) || r.amount <= 0) errors.push("Məbləğ yanlışdır");
+    return errors;
+  }
+
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else field += c;
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ",") { row.push(field); field = ""; }
+        else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+        else if (c === "\r") { /* skip */ }
+        else field += c;
+      }
+    }
+    if (field.length || row.length) { row.push(field); rows.push(row); }
+    return rows.filter(r => r.some(c => c.trim().length));
+  }
+
+  function extractSheetId(url) {
+    const m = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+    return m ? m[1] : null;
+  }
+  function extractGid(url) {
+    const m = url.match(/[?&#]gid=([0-9]+)/);
+    return m ? m[1] : "0";
+  }
+
+  async function fetchSheetRows(url) {
+    const id = extractSheetId(url.trim());
+    if (!id) throw new Error("Google Sheets linki tanınmadı. Ünvan '/spreadsheets/d/' hissəsini ehtiva etməlidir.");
+    const gid = extractGid(url.trim());
+    const csvUrl = "https://docs.google.com/spreadsheets/d/" + id + "/export?format=csv&gid=" + gid;
+    let resp;
+    try {
+      resp = await fetch(csvUrl);
+    } catch (e) {
+      throw new Error("Cədvələ şəbəkə sorğusu bloklandı. Bu funksiya yalnız saytın öz (GitHub Pages) ünvanından açıldıqda işləyir — aşağıdakı yapışdırma üsulunu istifadə edin.");
+    }
+    if (!resp.ok) {
+      throw new Error("Cədvəl yüklənmədi (HTTP " + resp.status + "). Paylaşım icazəsini yoxlayın: \"Link olan hər kəs baxa bilər\".");
+    }
+    const csvText = await resp.text();
+    const table = parseCSV(csvText);
+    return table.map(cells => cells.join("\t")).join("\n");
+  }
+
+  function parsePasted(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+    if (!lines.length) return [];
+    let start = 0;
+    const firstCells = splitCells(lines[0]);
+    if (looksLikeHeader(firstCells)) start = 1;
+
+    const out = [];
+    for (let i = start; i < lines.length; i++) {
+      const cells = splitCells(lines[i]).map(c => c.trim());
+      if (cells.length < 4) continue;
+      const rrn = cells[0].replace(/[^\d]/g, "");
+      const name = cells[1] || "";
+      const contract = cells[2] || "";
+      const amount = normalizeAmount(cells[3]);
+      const r = { rrn, name, contract, amount, selected: true };
+      r.errors = validateRow(r);
+      r.valid = r.errors.length === 0;
+      out.push(r);
+    }
+    return out;
+  }
+
+  // ---------- XML / ZIP building (QAIME_1 v304, VHF package format) ----------
+  const STYLESHEET_BLOCK = '<xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" > <xsl:template match="xsl:stylesheet" /> <xsl:template match="/root"> <html> <head> <style> body {background-color: white; font-family:  Arial, sans-serif; } .paper {padding:5px; } table {width: 100%; font-size: 16px; } table tr td {padding: 10px 15px; text-align: left; width:50%; } .products table {border-collapse: collapse; font-size: 14px; } .products table th, #products table td  {border: 1px solid #000; padding: 10px; } .products table td {width:auto; border: 1px solid #000; text-align:center; } .products table th {text-align:center; } .noPadding {padding: 40px 0px; } .total tr :nth-child(odd) {width:40%; } .total tr :nth-child(even) {width:10%; } </style> </head> <body> <table class="paper"> <tr> <td>Alan tərəfin VÖEN-i:</td> <td><xsl:value-of select="qaimeKime"/></td> </tr> <tr> <td>Alan tərəfin adı:</td> <td><xsl:value-of select="qaimeKimeAd"/></td> </tr> <tr> <td>Satan tərəfin VÖEN-i:</td> <td><xsl:value-of select="qaimeKimden"/></td> </tr> <tr> <td>Qeyd</td> <td><xsl:value-of select="des"/></td> </tr> <tr> <td>Əlavə qeyd</td> <td><xsl:value-of select="des2"/></td> </tr> <tr> <td>Obyektin adı</td> <td><xsl:value-of select="ma"/></td> </tr> <tr> <td>Obyektin kodu</td> <td><xsl:value-of select="mk"/></td> </tr> <tr> <td class="products noPadding" colspan="2"> <table> <thead> <th>Mal kodu</th> <th>Mal adı</th> <th>Bar kod</th> <th>Ölçü vahidi</th> <th>Malın miqdarı</th> <th>Malın buraxılış qiyməti</th> <th>Cəmi qiyməti</th> <th>Aksiz dərəcəsi</th> <th>Aksiz məbləği</th> <th>Cəmi məbləğ</th> <th>ƏDV-yə cəlb edilən məbləği</th> <th>ƏDV-yə cəlb edilməyən məbləği</th> <th>ƏDV-dən azad olunan</th> <th>ƏDV-yə 0 dərəcə ilə cəlb edilən məbləği</th> <th>Ödənilməli ƏDV</th> <th>Yol vergisi məbləği</th> <th>Yekun məbləğ</th> </thead> <tbody class="productTable"> <xsl:for-each select="product/qaimeTable/row"> <tr> <td><xsl:value-of select="c1"/></td> <td><xsl:value-of select="c2"/></td> <td><xsl:value-of select="c17"/></td> <td><xsl:value-of select="c3"/></td> <td><xsl:value-of select="c4"/></td> <td><xsl:value-of select="c5"/></td> <td><xsl:value-of select="c6"/></td> <td><xsl:value-of select="c7"/></td> <td><xsl:value-of select="c8"/></td> <td><xsl:value-of select="c9"/></td> <td><xsl:value-of select="c10"/></td> <td><xsl:value-of select="c11"/></td> <td><xsl:value-of select="c12"/></td> <td><xsl:value-of select="c13"/></td> <td><xsl:value-of select="c14"/></td> <td><xsl:value-of select="c15"/></td> <td><xsl:value-of select="c16"/></td> </tr> </xsl:for-each> </tbody> </table> </td> </tr> </table> <table class="total"> <tr> <td>Malların cəmi qiyməti</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c1"/></td> <td>Malların cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c3"/></td> </tr> <tr> <td>Malların aksiz cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c2"/></td> <td>Malların ƏDV-yə cəlb edilən cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c4"/></td> </tr> <tr> <td>Malların cəmi ödənilməli ƏDV məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c8"/></td> <td>Malların  ƏDV-yə cəlb edilməyən cəmi məbləği </td> <td><xsl:value-of select="product/qaimeYekunTable/row/c5"/></td> </tr> <tr> <td>ƏDV-dən azad olunan</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c6"/></td> <td>Malların  ƏDV-yə 0 dərəcə ilə cəlb edilən cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c7"/></td> </tr> <tr> <td>Yekun məbləğ</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c9"/></td> <td></td> <td></td> </tr> </table> </body> </html> </xsl:template> </xsl:stylesheet>';
+
+  function escapeXml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
+  function buildInvoiceXml(row, sTin, sName) {
+    const desText = row.contract.trim() + " lizinq müqaviləsinə əsasən aylıq mükafat";
+    const des2Text = row.contract.trim() + " lizinq müqaviləsinə əsasən";
+    const amt2 = row.amount.toFixed(2);
+    const amt4 = row.amount.toFixed(4);
+
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<?xml-stylesheet type="text/xsl" href="#stylesheet"?>\n' +
+      '<!DOCTYPE root [\n<!ATTLIST xsl:stylesheet\nid ID #REQUIRED>\n]>\n' +
+      '<root version ="304" kod= "QAIME_1"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation= "QAIME_1.xsd" >\n' +
+      STYLESHEET_BLOCK + '\t<qaimeKime>' + escapeXml(row.rrn) + '</qaimeKime>\n' +
+      '\t<qaimeKimden>' + escapeXml(sTin) + '</qaimeKimden>\n' +
+      '\t<ds></ds>\n' +
+      '\t<dn></dn>\n' +
+      '\t<des>' + escapeXml(desText) + '</des>\n' +
+      '\t<des2>' + escapeXml(des2Text) + '</des2>\n' +
+      '\t<ma></ma>\n' +
+      '\t<mk></mk>\n' +
+      '\t<product>\n' +
+      '\t\t<qaimeTable>\n' +
+      "\t\t\t<row no = '0'>\n" +
+      '\t\t\t\t<c1>9964911000</c1>\n' +
+      '\t\t\t\t<c2>' + escapeXml(desText) + '</c2>\n' +
+      '\t\t\t\t<c3>mükafat</c3>\n' +
+      '\t\t\t\t<c4>1</c4>\n' +
+      '\t\t\t\t<c5>' + amt2 + '</c5>\n' +
+      '\t\t\t\t<c6>' + amt4 + '</c6>\n' +
+      '\t\t\t\t<c7>0</c7>\n' +
+      '\t\t\t\t<c8>0</c8>\n' +
+      '\t\t\t\t<c9>' + amt4 + '</c9>\n' +
+      '\t\t\t\t<c10>0</c10>\n' +
+      '\t\t\t\t<c11>' + amt2 + '</c11>\n' +
+      '\t\t\t\t<c12>0</c12>\n' +
+      '\t\t\t\t<c13>0</c13>\n' +
+      '\t\t\t\t<c14>0.0000</c14>\n' +
+      '\t\t\t\t<c15>0</c15>\n' +
+      '\t\t\t\t<c16>' + amt4 + '</c16>\n' +
+      '\t\t\t\t<c17>0</c17>\n' +
+      '\t\t\t\t<productId>0</productId>\n' +
+      '\t\t\t</row>\n' +
+      '\t\t</qaimeTable>\n' +
+      '\t\t<qaimeYekunTable>\n' +
+      '\t\t\t<row>\n' +
+      '\t\t\t\t<c1>' + amt2 + '</c1>\n' +
+      '\t\t\t\t<c2>0</c2>\n' +
+      '\t\t\t\t<c3>' + amt2 + '</c3>\n' +
+      '\t\t\t\t<c4>0</c4>\n' +
+      '\t\t\t\t<c5>' + amt2 + '</c5>\n' +
+      '\t\t\t\t<c6>0</c6>\n' +
+      '\t\t\t\t<c7>0</c7>\n' +
+      '\t\t\t\t<c8>0.00</c8>\n' +
+      '\t\t\t\t<c9>' + amt2 + '</c9>\n' +
+      '\t\t\t\t<c10>0</c10>\n' +
+      '\t\t\t</row>\n' +
+      '\t\t</qaimeYekunTable>\n' +
+      '\t</product>\n' +
+      '</root>\n';
+  }
+
+  // -- byte writer --
+  function ByteWriter() { this.parts = []; }
+  ByteWriter.prototype.u16 = function (v) { this.parts.push(new Uint8Array([v & 0xFF, (v >> 8) & 0xFF])); };
+  ByteWriter.prototype.u32 = function (v) {
+    this.parts.push(new Uint8Array([v & 0xFF, (v >> 8) & 0xFF, (v >> 16) & 0xFF, (v >>> 24) & 0xFF]));
+  };
+  ByteWriter.prototype.bytes = function (b) { this.parts.push(b); };
+  ByteWriter.prototype.toBytes = function () { return concatBytes(this.parts); };
+
+  function concatBytes(arr) {
+    let total = 0;
+    for (const a of arr) total += a.length;
+    const out = new Uint8Array(total);
+    let off = 0;
+    for (const a of arr) { out.set(a, off); off += a.length; }
+    return out;
+  }
+
+  const CRC_TABLE = (function () {
+    const t = new Uint32Array(256);
+    for (let n = 0; n < 256; n++) {
+      let c = n;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+      t[n] = c >>> 0;
+    }
+    return t;
+  })();
+
+  function crc32(bytes) {
+    let crc = 0xFFFFFFFF;
+    for (let i = 0; i < bytes.length; i++) crc = CRC_TABLE[(crc ^ bytes[i]) & 0xFF] ^ (crc >>> 8);
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
+
+  async function rawDeflate(bytes) {
+    const cs = new CompressionStream("deflate-raw");
+    const writer = cs.writable.getWriter();
+    writer.write(bytes);
+    writer.close();
+    const reader = cs.readable.getReader();
+    const chunks = [];
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+    }
+    return concatBytes(chunks);
+  }
+
+  function dosDateTime(d) {
+    const dosTime = ((d.getHours() & 0x1F) << 11) | ((d.getMinutes() & 0x3F) << 5) | ((Math.floor(d.getSeconds() / 2)) & 0x1F);
+    const dosDate = (((Math.max(0, d.getFullYear() - 1980)) & 0x7F) << 9) | (((d.getMonth() + 1) & 0xF) << 5) | (d.getDate() & 0x1F);
+    return { dosTime, dosDate };
+  }
+
+  async function buildZipEntry(name, contentBytes, dosTime, dosDate, relOffset) {
+    const nameBytes = new TextEncoder().encode(name);
+    const compressed = await rawDeflate(contentBytes);
+    const crc = crc32(contentBytes);
+    const csize = compressed.length;
+    const usize = contentBytes.length;
+
+    const local = new ByteWriter();
+    local.u32(0x04034B50);
+    local.u16(20); local.u16(8); local.u16(8);
+    local.u16(dosTime); local.u16(dosDate);
+    local.u32(0); local.u32(0); local.u32(0);
+    local.u16(nameBytes.length); local.u16(0);
+    local.bytes(nameBytes);
+
+    const descriptor = new ByteWriter();
+    descriptor.u32(0x08074B50);
+    descriptor.u32(crc); descriptor.u32(csize); descriptor.u32(usize);
+
+    const block = concatBytes([local.toBytes(), compressed, descriptor.toBytes()]);
+
+    const cd = new ByteWriter();
+    cd.u32(0x02014B50);
+    cd.u16(20); cd.u16(20); cd.u16(8); cd.u16(8);
+    cd.u16(dosTime); cd.u16(dosDate);
+    cd.u32(crc); cd.u32(csize); cd.u32(usize);
+    cd.u16(nameBytes.length); cd.u16(0); cd.u16(0); cd.u16(0); cd.u16(0);
+    cd.u32(0); cd.u32(relOffset);
+    cd.bytes(nameBytes);
+
+    return { block, cdEntry: cd.toBytes() };
+  }
+
+  async function buildZipPackage(entries) {
+    const now = new Date();
+    const { dosTime, dosDate } = dosDateTime(now);
+    const mfContent = new TextEncoder().encode("VHF-Manifest-Version: 1.0\r\n\r\n");
+    const all = [{ name: "vhf-inf/vhf.mf", content: mfContent }].concat(entries);
+
+    let offset = 0;
+    const blocks = [], cdEntries = [];
+    for (const e of all) {
+      const { block, cdEntry } = await buildZipEntry(e.name, e.content, dosTime, dosDate, offset);
+      blocks.push(block); cdEntries.push(cdEntry);
+      offset += block.length;
+    }
+    const cdOffset = offset;
+    let cdSize = 0;
+    for (const c of cdEntries) cdSize += c.length;
+
+    const eocd = new ByteWriter();
+    eocd.u32(0x06054B50);
+    eocd.u16(0); eocd.u16(0);
+    eocd.u16(all.length); eocd.u16(all.length);
+    eocd.u32(cdSize); eocd.u32(cdOffset); eocd.u16(0);
+
+    return concatBytes(blocks.concat(cdEntries).concat([eocd.toBytes()]));
+  }
+
+  // ---------- rendering ----------
+  function render() {
+    if (!rows.length) {
+      tableCard.style.display = "none";
+      emptyState.style.display = "block";
+      actionbar.style.display = "none";
+      return;
+    }
+    emptyState.style.display = "none";
+    tableCard.style.display = "block";
+    actionbar.style.display = "flex";
+
+    rowsBody.innerHTML = "";
+    rows.forEach((r, i) => {
+      const tr = document.createElement("tr");
+      tr.className = r.valid ? "" : "row-invalid";
+
+      const tdChk = document.createElement("td");
+      tdChk.className = "chk";
+      const chk = document.createElement("input");
+      chk.type = "checkbox";
+      chk.checked = r.selected;
+      chk.disabled = !r.valid;
+      chk.addEventListener("change", () => { r.selected = chk.checked; updateSummary(); });
+      tdChk.appendChild(chk);
+      tr.appendChild(tdChk);
+
+      const tdIdx = document.createElement("td");
+      tdIdx.className = "idx";
+      tdIdx.textContent = i + 1;
+      tr.appendChild(tdIdx);
+
+      function editableCell(field, cls) {
+        const td = document.createElement("td");
+        if (cls) td.className = cls;
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.className = cls === "amt" ? "num" : "";
+        inp.value = field === "amount" ? (isFinite(r.amount) ? r.amount : "") : r[field];
+        inp.addEventListener("input", () => {
+          if (field === "amount") r.amount = normalizeAmount(inp.value);
+          else r[field] = inp.value;
+          r.rrn = field === "rrn" ? inp.value.replace(/[^\d]/g, "") : r.rrn;
+          r.errors = validateRow(r);
+          const wasValid = r.valid;
+          r.valid = r.errors.length === 0;
+          if (!r.valid) r.selected = false;
+          if (r.valid !== wasValid) render(); else { updateChip(tr, r); updateSummary(); }
+        });
+        td.appendChild(inp);
+        return td;
+      }
+
+      tr.appendChild(editableCell("rrn"));
+      tr.appendChild(editableCell("name"));
+      tr.appendChild(editableCell("contract"));
+      tr.appendChild(editableCell("amount", "amt"));
+
+      const tdStatus = document.createElement("td");
+      tdStatus.appendChild(makeChip(r));
+      tr.appendChild(tdStatus);
+
+      const tdXml = document.createElement("td");
+      const xmlBtn = document.createElement("button");
+      xmlBtn.className = "xml-toggle";
+      xmlBtn.textContent = "XML";
+      xmlBtn.addEventListener("click", () => toggleXmlRow(tr, r));
+      tdXml.appendChild(xmlBtn);
+      tr.appendChild(tdXml);
+
+      rowsBody.appendChild(tr);
+    });
+
+    updateSummary();
+  }
+
+  function makeChip(r) {
+    const span = document.createElement("span");
+    span.className = "chip " + (r.valid ? "ok" : "bad");
+    span.textContent = r.valid ? "Hazır" : r.errors[0];
+    span.title = r.errors.join("; ");
+    return span;
+  }
+
+  function updateChip(tr, r) {
+    const cell = tr.children[6];
+    cell.innerHTML = "";
+    cell.appendChild(makeChip(r));
+    tr.className = r.valid ? "" : "row-invalid";
+    tr.children[0].querySelector("input").disabled = !r.valid;
+    tr.children[0].querySelector("input").checked = r.selected;
+  }
+
+  function toggleXmlRow(tr, r) {
+    const next = tr.nextElementSibling;
+    if (next && next.classList.contains("xml-row")) { next.remove(); return; }
+    const xr = document.createElement("tr");
+    xr.className = "xml-row";
+    const td = document.createElement("td");
+    td.colSpan = 8;
+    const pre = document.createElement("pre");
+    pre.textContent = r.valid
+      ? buildInvoiceXml(r, senderTin.value.trim(), senderName.value.trim())
+      : "Bu sətirdə xəta var, XML yaradıla bilmir: " + r.errors.join("; ");
+    td.appendChild(pre);
+    xr.appendChild(td);
+    tr.parentNode.insertBefore(xr, tr.nextSibling);
+  }
+
+  function updateSummary() {
+    const selected = rows.filter(r => r.valid && r.selected);
+    selCount.textContent = selected.length;
+    selSum.textContent = selected.reduce((a, r) => a + r.amount, 0).toFixed(2);
+    buildBtn.disabled = selected.length === 0;
+  }
+
+  // ---------- events ----------
+  fetchSheetBtn.addEventListener("click", async () => {
+    const url = sheetUrl.value.trim();
+    if (!url) {
+      fetchNote.className = "parse-note warn show";
+      fetchNote.textContent = "Əvvəlcə Google Sheets linkini daxil edin.";
+      return;
+    }
+    fetchSheetBtn.disabled = true;
+    const original = fetchSheetBtn.textContent;
+    fetchSheetBtn.textContent = "Yüklənir…";
+    try {
+      const tsv = await fetchSheetRows(url);
+      pasteArea.value = tsv;
+      saveSettings();
+      const parsed = parsePasted(tsv);
+      rows = parsed;
+      const bad = parsed.filter(r => !r.valid).length;
+      fetchNote.className = "parse-note info show";
+      fetchNote.textContent = "Cədvəldən " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
+      render();
+    } catch (err) {
+      fetchNote.className = "parse-note warn show";
+      fetchNote.textContent = err.message;
+    } finally {
+      fetchSheetBtn.disabled = false;
+      fetchSheetBtn.textContent = original;
+    }
+  });
+
+  parseBtn.addEventListener("click", () => {
+    const parsed = parsePasted(pasteArea.value);
+    rows = parsed;
+    if (!parsed.length) {
+      parseNote.className = "parse-note warn show";
+      parseNote.textContent = "Heç bir sətir tapılmadı. Cədvəldən sütunları (RRN, Ad, Müqavilə, Məbləğ) TAB və ya vergüllə ayrılmış şəkildə yapışdırdığınızdan əmin olun.";
+    } else {
+      const bad = parsed.filter(r => !r.valid).length;
+      parseNote.className = "parse-note info show";
+      parseNote.textContent = parsed.length + " sətir tapıldı" + (bad ? ", " + bad + " sətirdə xəta var (cədvəldə düzəldin)" : ", hamısı doğrulandı") + ".";
+    }
+    render();
+  });
+
+  clearBtn.addEventListener("click", () => {
+    pasteArea.value = "";
+    rows = [];
+    parseNote.className = "parse-note";
+    render();
+  });
+
+  document.getElementById("selectAllBtn").addEventListener("click", () => {
+    rows.forEach(r => { if (r.valid) r.selected = true; });
+    render();
+  });
+  document.getElementById("selectNoneBtn").addEventListener("click", () => {
+    rows.forEach(r => { r.selected = false; });
+    render();
+  });
+
+  buildBtn.addEventListener("click", async () => {
+    const selected = rows.filter(r => r.valid && r.selected);
+    if (!selected.length) return;
+    buildBtn.disabled = true;
+    const originalLabel = buildBtn.textContent;
+    buildBtn.textContent = "Hazırlanır…";
+    try {
+      const sTin = senderTin.value.trim();
+      const sName = senderName.value.trim();
+      const entries = selected.map((r, i) => ({
+        name: "qaime_" + (i + 1) + "_" + r.rrn + ".xml",
+        content: new TextEncoder().encode(buildInvoiceXml(r, sTin, sName))
+      }));
+      const zipBytes = await buildZipPackage(entries);
+      const blob = new Blob([zipBytes], { type: "application/zip" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+      a.href = url;
+      a.download = "paket_" + stamp + ".zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (err) {
+      parseNote.className = "parse-note warn show";
+      parseNote.textContent = "ZIP hazırlanarkən xəta baş verdi: " + err.message;
+    } finally {
+      buildBtn.disabled = selected.length === 0;
+      buildBtn.textContent = originalLabel;
+    }
+  });
+
+  render();
+})();
+</script>
