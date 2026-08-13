@@ -1,6 +1,6 @@
 import {
   rowsFromTable, textToTable, normalizeAmount, extractContractNumber,
-  validateRow, parseCSV, fetchSheetRows, parsePasted,
+  validateRow, parseCSV, fetchSheetRows, emptyResultMessage,
   buildInvoiceXml, buildZipPackage
 } from "../core/qaimeEngine.js";
 
@@ -213,9 +213,14 @@ export function initQaimePage() {
       }
       const parsed = rowsFromTable(table);
       rows = parsed;
-      const bad = parsed.filter(r => !r.valid).length;
-      fileNote.className = "parse-note info show";
-      fileNote.textContent = "Fayldan " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
+      if (!parsed.length) {
+        fileNote.className = "parse-note warn show";
+        fileNote.textContent = emptyResultMessage(table);
+      } else {
+        const bad = parsed.filter(r => !r.valid).length;
+        fileNote.className = "parse-note info show";
+        fileNote.textContent = "Fayldan " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
+      }
       render();
     } catch (err) {
       fileNote.className = "parse-note warn show";
@@ -239,9 +244,14 @@ export function initQaimePage() {
       saveSettings();
       const parsed = rowsFromTable(table);
       rows = parsed;
-      const bad = parsed.filter(r => !r.valid).length;
-      fetchNote.className = "parse-note info show";
-      fetchNote.textContent = "Cədvəldən " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
+      if (!parsed.length) {
+        fetchNote.className = "parse-note warn show";
+        fetchNote.textContent = emptyResultMessage(table);
+      } else {
+        const bad = parsed.filter(r => !r.valid).length;
+        fetchNote.className = "parse-note info show";
+        fetchNote.textContent = "Cədvəldən " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
+      }
       render();
     } catch (err) {
       fetchNote.className = "parse-note warn show";
@@ -253,11 +263,12 @@ export function initQaimePage() {
   });
 
   parseBtn.addEventListener("click", () => {
-    const parsed = parsePasted(pasteArea.value);
+    const table = textToTable(pasteArea.value);
+    const parsed = rowsFromTable(table);
     rows = parsed;
     if (!parsed.length) {
       parseNote.className = "parse-note warn show";
-      parseNote.textContent = "Heç bir sətir tapılmadı. Cədvəldən sütunları (RRN, Ad, Müqavilə, Məbləğ) TAB və ya vergüllə ayrılmış şəkildə yapışdırdığınızdan əmin olun.";
+      parseNote.textContent = emptyResultMessage(table);
     } else {
       const bad = parsed.filter(r => !r.valid).length;
       parseNote.className = "parse-note info show";
