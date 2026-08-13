@@ -172,7 +172,7 @@ export function buildInvoiceXml(row, sTin, sName) {
     '\t\t\t\t<c14>0.0000</c14>\n' +
     '\t\t\t\t<c15>0</c15>\n' +
     '\t\t\t\t<c16>' + amt4 + '</c16>\n' +
-    '\t\t\t\t<c17></c17>\n' +
+    '\t\t\t\t<c17>0</c17>\n' +
     '\t\t\t\t<productId>0</productId>\n' +
     '\t\t\t</row>\n' +
     '\t\t</qaimeTable>\n' +

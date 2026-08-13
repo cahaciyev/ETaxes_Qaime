@@ -33,7 +33,7 @@ id ID #REQUIRED>
 				<c14>0.0000</c14>
 				<c15>0</c15>
 				<c16>`+p+`</c16>
-				<c17></c17>
+				<c17>0</c17>
 				<productId>0</productId>
 			</row>
 		</qaimeTable>
