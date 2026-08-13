@@ -1,6 +1,11 @@
 // QAIME_1 (v304) parsing / validation / XML / ZIP engine.
 // Logic ported unchanged from the original single-file implementation.
 
+export function splitCells(line) {
+  if (line.indexOf("\t") !== -1) return line.split("\t");
+  return line.split(",");
+}
+
 export function detectColumnMap(headerCells) {
   const map = {};
   let hits = 0;
@@ -40,15 +45,8 @@ export function rowsFromTable(table) {
   return out;
 }
 
-export function emptyResultMessage(table) {
-  if (!table || !table.length) return "Fayl/cədvəl boşdur, heç bir sətir tapılmadı.";
-  if (!detectColumnMap(table[0])) {
-    return "Sütun başlıqları tanınmadı (gözlənilən: Ad, Müqavilə, RRN/VÖEN/Borrower ID, Amount/Məbləğ). Birinci sətirdə bu adlardan ən azı ikisi olmalıdır.";
-  }
-  if (table.length === 1) {
-    return "Yalnız başlıq sətri tapıldı, data sətri yoxdur. Başlıq sətri ilə data sətirləri arasında ayrıca sətir olduğundan əmin olun — çox güman ki, hamısı bir sətirdə birləşib.";
-  }
-  return "Sətir tapılmadı.";
+export function textToTable(text) {
+  return text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0).map(splitCells);
 }
 
 export function normalizeAmount(raw) {
@@ -120,6 +118,10 @@ export async function fetchSheetRows(url) {
   }
   const csvText = await resp.text();
   return parseCSV(csvText);
+}
+
+export function parsePasted(text) {
+  return rowsFromTable(textToTable(text));
 }
 
 // ---------- XML / ZIP building (QAIME_1 v304, VHF package format) ----------
