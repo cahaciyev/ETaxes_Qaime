@@ -1,16 +1,12 @@
 import {
-  rowsFromTable, textToTable, normalizeAmount, extractContractNumber,
-  validateRow, parseCSV, fetchSheetRows, emptyResultMessage,
+  rowsFromTable, normalizeAmount, extractContractNumber,
+  validateRow, parseCSV, fetchSheetRows, detectColumnMap, emptyResultMessage,
   buildInvoiceXml, buildZipPackage
 } from "../core/qaimeEngine.js";
 
 export function initQaimePage() {
   let rows = []; // {rrn, name, contract, amount, valid, errors, selected}
 
-  const pasteArea = document.getElementById("pasteArea");
-  const parseBtn = document.getElementById("parseBtn");
-  const clearBtn = document.getElementById("clearBtn");
-  const parseNote = document.getElementById("parseNote");
   const tableCard = document.getElementById("tableCard");
   const rowsBody = document.getElementById("rowsBody");
   const emptyState = document.getElementById("emptyState");
@@ -18,6 +14,7 @@ export function initQaimePage() {
   const selCount = document.getElementById("selCount");
   const selSum = document.getElementById("selSum");
   const buildBtn = document.getElementById("buildBtn");
+  const buildNote = document.getElementById("buildNote");
   const senderTin = document.getElementById("senderTin");
   const senderName = document.getElementById("senderName");
   const sheetUrl = document.getElementById("sheetUrl");
@@ -26,8 +23,10 @@ export function initQaimePage() {
   const fileInput = document.getElementById("fileInput");
   const fileNameEl = document.getElementById("fileName");
   const fileNote = document.getElementById("fileNote");
+  const readFileBtn = document.getElementById("readFileBtn");
+  const removeFileBtn = document.getElementById("removeFileBtn");
 
-  if (!pasteArea || !parseBtn) return; // not on this page
+  if (!fileInput || !fetchSheetBtn) return; // not on this page
 
   // ---------- settings persistence ----------
   const SETTINGS_KEY = "qaimePaketSettings";
@@ -190,37 +189,71 @@ export function initQaimePage() {
   }
 
   // ---------- events ----------
-  fileInput.addEventListener("change", async () => {
+  function parseTable(table, sourceLabel) {
+    if (!table.length || !detectColumnMap(table[0])) {
+      rows = [];
+      return { ok: false, message: emptyResultMessage(table) };
+    }
+    const parsed = rowsFromTable(table);
+    rows = parsed;
+    if (!parsed.length) return { ok: false, message: emptyResultMessage(table) };
+    const bad = parsed.filter(r => !r.valid).length;
+    return {
+      ok: true,
+      message: sourceLabel + " " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + "."
+    };
+  }
+
+  async function readTableFromFile(file) {
+    const ext = file.name.split(".").pop().toLowerCase();
+    if (ext === "csv") {
+      const text = await file.text();
+      return parseCSV(text);
+    }
+    if (typeof XLSX === "undefined") {
+      throw new Error("Excel oxuma kitabxanası yüklənmədi (internet bağlantısını yoxlayın) — CSV formatında sınayın.");
+    }
+    const buf = await file.arrayBuffer();
+    const wb = XLSX.read(buf, { type: "array" });
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    return XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: "" });
+  }
+
+  function resetFileSelection() {
+    fileInput.value = "";
+    fileNameEl.textContent = "Fayl seçilməyib";
+    readFileBtn.style.display = "none";
+    removeFileBtn.style.display = "none";
+    fileNote.className = "parse-note";
+    fileNote.textContent = "";
+  }
+
+  fileInput.addEventListener("change", () => {
     const file = fileInput.files && fileInput.files[0];
     if (!file) return;
     fileNameEl.textContent = file.name;
+    readFileBtn.style.display = "";
+    removeFileBtn.style.display = "";
+    fileNote.className = "parse-note";
+    fileNote.textContent = "";
+  });
+
+  removeFileBtn.addEventListener("click", () => {
+    resetFileSelection();
+    rows = [];
+    render();
+  });
+
+  readFileBtn.addEventListener("click", async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
     fileNote.className = "parse-note info show";
     fileNote.textContent = "Oxunur…";
     try {
-      const ext = file.name.split(".").pop().toLowerCase();
-      let table;
-      if (ext === "csv") {
-        const text = await file.text();
-        table = parseCSV(text);
-      } else {
-        if (typeof XLSX === "undefined") {
-          throw new Error("Excel oxuma kitabxanası yüklənmədi (internet bağlantısını yoxlayın) — CSV formatında sınayın.");
-        }
-        const buf = await file.arrayBuffer();
-        const wb = XLSX.read(buf, { type: "array" });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        table = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, defval: "" });
-      }
-      const parsed = rowsFromTable(table);
-      rows = parsed;
-      if (!parsed.length) {
-        fileNote.className = "parse-note warn show";
-        fileNote.textContent = emptyResultMessage(table);
-      } else {
-        const bad = parsed.filter(r => !r.valid).length;
-        fileNote.className = "parse-note info show";
-        fileNote.textContent = "Fayldan " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
-      }
+      const table = await readTableFromFile(file);
+      const result = parseTable(table, "Fayldan");
+      fileNote.className = "parse-note " + (result.ok ? "info" : "warn") + " show";
+      fileNote.textContent = result.message;
       render();
     } catch (err) {
       fileNote.className = "parse-note warn show";
@@ -240,18 +273,10 @@ export function initQaimePage() {
     fetchSheetBtn.textContent = "Yüklənir…";
     try {
       const table = await fetchSheetRows(url);
-      pasteArea.value = table.map(cells => cells.join("\t")).join("\n");
       saveSettings();
-      const parsed = rowsFromTable(table);
-      rows = parsed;
-      if (!parsed.length) {
-        fetchNote.className = "parse-note warn show";
-        fetchNote.textContent = emptyResultMessage(table);
-      } else {
-        const bad = parsed.filter(r => !r.valid).length;
-        fetchNote.className = "parse-note info show";
-        fetchNote.textContent = "Cədvəldən " + parsed.length + " sətir yükləndi" + (bad ? ", " + bad + " sətirdə xəta var" : "") + ".";
-      }
+      const result = parseTable(table, "Cədvəldən");
+      fetchNote.className = "parse-note " + (result.ok ? "info" : "warn") + " show";
+      fetchNote.textContent = result.message;
       render();
     } catch (err) {
       fetchNote.className = "parse-note warn show";
@@ -260,28 +285,6 @@ export function initQaimePage() {
       fetchSheetBtn.disabled = false;
       fetchSheetBtn.textContent = original;
     }
-  });
-
-  parseBtn.addEventListener("click", () => {
-    const table = textToTable(pasteArea.value);
-    const parsed = rowsFromTable(table);
-    rows = parsed;
-    if (!parsed.length) {
-      parseNote.className = "parse-note warn show";
-      parseNote.textContent = emptyResultMessage(table);
-    } else {
-      const bad = parsed.filter(r => !r.valid).length;
-      parseNote.className = "parse-note info show";
-      parseNote.textContent = parsed.length + " sətir tapıldı" + (bad ? ", " + bad + " sətirdə xəta var (cədvəldə düzəldin)" : ", hamısı doğrulandı") + ".";
-    }
-    render();
-  });
-
-  clearBtn.addEventListener("click", () => {
-    pasteArea.value = "";
-    rows = [];
-    parseNote.className = "parse-note";
-    render();
   });
 
   document.getElementById("selectAllBtn").addEventListener("click", () => {
@@ -323,8 +326,8 @@ export function initQaimePage() {
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 4000);
     } catch (err) {
-      parseNote.className = "parse-note warn show";
-      parseNote.textContent = "ZIP hazırlanarkən xəta baş verdi: " + err.message;
+      buildNote.className = "parse-note warn show";
+      buildNote.textContent = "ZIP hazırlanarkən xəta baş verdi: " + err.message;
     } finally {
       buildBtn.disabled = selected.length === 0;
       buildBtn.textContent = originalLabel;
