@@ -84,6 +84,8 @@
             <label class="btn btn-primary" for="fileInput" style="cursor:pointer;">Fayl seç</label>
             <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
             <span id="fileName" style="color:var(--ink-muted); font-size:13.5px;">Fayl seçilməyib</span>
+            <button class="btn btn-primary" id="readFileBtn" style="display:none;">Faylı oxu</button>
+            <button class="btn btn-ghost" id="removeFileBtn" style="display:none;">Sil</button>
           </div>
           <span id="fileNote" class="parse-note"></span>
         </div>
@@ -100,21 +102,6 @@
             <button class="btn btn-primary" id="fetchSheetBtn">Cədvəldən yüklə</button>
           </div>
           <span id="fetchNote" class="parse-note"></span>
-        </div>
-      </section>
-
-      <section class="card">
-        <div class="card-head"><h2>Əl ilə daxil etmə (alternativ)</h2></div>
-        <div class="card-body">
-          <p class="paste-hint">
-            İstəsəniz cədvəldən sətirləri birbaşa da yapışdıra bilərsiniz: seçin <b>(Ctrl+A → Ctrl+C)</b>, aşağıya yapışdırın <b>(Ctrl+V)</b>.
-          </p>
-          <textarea id="pasteArea" placeholder="Ad	Müqavilə	Borrower ID	Amount&#10;NÜMUNƏ MƏMMƏDOV	100 saylı	1234567890	1500&#10;NÜMUNƏ ƏLİYEV	101 saylı	9876543210	2200"></textarea>
-          <div class="paste-actions">
-            <button class="btn btn-primary" id="parseBtn">Cədvəli oxu</button>
-            <button class="btn btn-ghost" id="clearBtn">Təmizlə</button>
-            <span id="parseNote" class="parse-note"></span>
-          </div>
         </div>
       </section>
 
@@ -151,7 +138,9 @@
         </div>
       </section>
 
-      <div class="empty-state" id="emptyState">Paket hazırlamaq üçün əvvəlcə yuxarıda cədvəl datasını yapışdırıb "Cədvəli oxu" düyməsini basın.</div>
+      <div class="empty-state" id="emptyState">Paket hazırlamaq üçün əvvəlcə fayl seçib "Faylı oxu" düyməsini basın, Google Sheets linkindən yükləyin, və ya sətri əl ilə əlavə edin.</div>
+
+      <span id="buildNote" class="parse-note"></span>
 
       <div class="actionbar" id="actionbar" style="display:none;">
         <div class="summary">

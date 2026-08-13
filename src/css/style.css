@@ -305,11 +305,6 @@ input[type="text"], textarea {
   padding: 9px 11px; transition: border-color .12s ease, background .12s ease;
 }
 input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--accent); background: var(--surface); }
-
-textarea#pasteArea {
-  min-height: 130px; resize: vertical;
-  font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: 13px; line-height: 1.5;
-}
 .paste-hint { font-size: 13px; color: var(--ink-muted); line-height: 1.6; margin: 0 0 12px; }
 .paste-hint b { color: var(--ink); font-weight: 600; }
 .paste-actions { display: flex; gap: 10px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
